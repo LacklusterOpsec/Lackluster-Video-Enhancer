@@ -5,12 +5,13 @@
 ## Changes in this fork
 
 **Newest additions**
-- Added **bfloat16** as a precision option. `Auto` now uses bfloat16 on RTX 30-series/Ampere+ GPUs (same speed as fp16, better dynamic range — no overflow on bright/HDR content) and falls back to fp16 elsewhere.
+- Added **bfloat16** as a precision option for the PyTorch backend. `Auto` now uses bfloat16 on RTX 30-series/Ampere+ GPUs (same speed as fp16, better dynamic range — no overflow on bright/HDR content) and fp16 elsewhere. The TensorRT backend always uses fp16/fp32 engines (bf16 is not supported for TensorRT engines).
 - Added **PyTorch 2.13** (CUDA 13 / Blackwell / RTX 50-series) and **TensorRT 11** as selectable install options. Older versions (2.9 / 2.8 / 2.6) are kept in the dropdown for compatibility with older GPUs — see the tooltip notes in the app.
+- **TensorRT engine fixes on the 2.13 / TRT 11 stack**: bf16 is never passed to TRT engine builds, and the RIFE `grid_sampler` decomposition that caused ghosting/flash artifacts on torch-tensorrt 2.13 has been replaced with the native grid_sampler path (engines rebuild automatically with a `_gsnative` suffix).
 - Fixed the PyInstaller build (`backports` runtime error on Python 3.11) and made `build.py` stop force-recreating an existing venv.
-- Fixed the GitHub Actions CI for this fork (branches + release notes from this repo); `build-prerelease` builds Windows/Linux/macOS and publishes a release.
+- Fixed the GitHub Actions CI for this fork (branches + release notes from this repo, Node 24 runtimes, macOS Homebrew tap-trust/llvm fixes); `build-prerelease` builds Windows/Linux/macOS and publishes a release.
 - App update checks, the home-tab changelog, and backend downloads now point at **this fork** instead of upstream.
-- Windows installer (NSIS) version synced to 2.4.3.
+- Windows installer (NSIS) version synced to 2.4.3, branded as **LacklusterOpsec**, with the start-menu shortcut installed directly (no company subfolder).
 
 **Bug fixes**
 - Fixed FFmpeg reading randomly stopping mid-render (`-nostdin` on the reader process)
@@ -56,9 +57,9 @@ Notes:
 
 | Precision | GPU support | Notes |
 |---|---|---|
-| **auto** (default) | — | Uses **bfloat16** on RTX 30-series / Ampere+ (sm_80+), **float16** elsewhere, **float32** if half precision is unavailable. |
+| **auto** (default) | — | PyTorch backend: **bfloat16** on RTX 30-series / Ampere+ (sm_80+), **float16** elsewhere, **float32** if half precision is unavailable. TensorRT backend: always fp16/fp32 engines. |
 | **float16** | All CUDA/ROCm/XPU/MPS | Fastest, lowest VRAM. |
-| **bfloat16** | RTX 30-series+ (Ampere, sm_80+) | Same speed as float16, but with an 8-bit exponent — no overflow on bright/HDR content. Falls back to float32 automatically if a model doesn't support it. |
+| **bfloat16** | RTX 30-series+ (Ampere, sm_80+) | PyTorch backend only. Same speed as float16, but with an 8-bit exponent — no overflow on bright/HDR content. Falls back to float32 automatically if a model doesn't support it. TensorRT uses fp16 instead. |
 | **float32** | All | Slowest, most compatible. |
 
 ### TensorRT
@@ -71,6 +72,8 @@ Notes:
 Notes:
 - TensorRT requires an NVIDIA GPU with dedicated tensor cores — **RTX 20-series (Turing) or newer**. Not available on GTX 10/16-series or older.
 - TensorRT 11 requires CUDA 13-capable drivers (all RTX 20+ with recent drivers).
+- TensorRT engines are built in fp16/fp32 only (no bf16 engine support).
+- On torch-tensorrt 2.13 / TRT 11, the RIFE engine uses the native `grid_sampler` path (the older manual decomposition caused ghosting/flash artifacts on this stack).
 
 ### NCNN (Vulkan)
 
