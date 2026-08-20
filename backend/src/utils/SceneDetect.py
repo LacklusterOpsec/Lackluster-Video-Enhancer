@@ -67,23 +67,15 @@ class NPMeanSegmentedSCDetect(BaseDetector):
         self.maxDetections = maxDetections
 
     def segmentImage(self, img: np.ndarray):
-        # split image into segments
-        # calculate mean of each segment
-        # return list of means
+        # split image into segments and compute the mean of each segment
         h, w = img.shape[:2]
-        segment_height = h // self.segments
-        segment_width = w // self.segments
-
-        means = {}
-        for i in range(self.segments):
-            for j in range(self.segments):
-                segment = img[
-                    i * segment_height : (i + 1) * segment_height,
-                    j * segment_width : (j + 1) * segment_width,
-                ]
-                means[i] = np.mean(segment)
-
-        return means
+        sh = h // self.segments
+        sw = w // self.segments
+        # crop to an exact multiple of the segment grid so a single reshape
+        # can compute every cell mean without per-segment python loops
+        img = img[: sh * self.segments, : sw * self.segments]
+        seg = img.reshape(self.segments, sh, self.segments, sw, -1)
+        return seg.mean(axis=(1, 3, -1))
 
     # a simple scene detect based on mean
     def sceneDetect(self, img1: Frame):
@@ -94,18 +86,13 @@ class NPMeanSegmentedSCDetect(BaseDetector):
             return
         self.i1 = img1
         segmentsImg2Mean = self.segmentImage(self.i1)
-        detections = 0
-        for key, value in self.segmentsImg1Mean.items():
-            if (
-                value > segmentsImg2Mean[key] + self.sensitivity
-                or value < segmentsImg2Mean[key] - self.sensitivity
-            ):
-                self.segmentsImg1Mean = segmentsImg2Mean
-                detections += 1
-                if detections >= self.maxDetections:
-                    return True
+        detections = int(
+            np.count_nonzero(
+                np.abs(self.segmentsImg1Mean - segmentsImg2Mean) > self.sensitivity
+            )
+        )
         self.segmentsImg1Mean = segmentsImg2Mean
-        return False
+        return detections >= self.maxDetections
 
 
 class NPMeanDiffSCDetect(BaseDetector):
@@ -141,7 +128,7 @@ class PySceneDetect(BaseDetector):
         self.frameNum = 0
 
     def sceneDetect(self, frame: Frame):
-        frame = cv2.resize(frame.get_np_sdr(), (640, 360))
+        frame = frame.get_np_sdr_resized(640, 360)
         frameList = self.detector.process_frame(self.frameNum, frame)
         self.frameNum += 1
         if len(frameList) > 0:

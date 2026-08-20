@@ -164,12 +164,14 @@ class DownloadTab:
 
     def installRecommended(self):
         pytorch_backend = GPUDetect().getPyTorchFeatures()
+        return_code: int = 0
         if pytorch_backend and self.has_enough_space:
-            self.download("torch", install=True, pytorch_backend=pytorch_backend)
+            return_code = self.download("torch", install=True, pytorch_backend=pytorch_backend)
         elif PLATFORM == 'darwin' and CPU_ARCH == "arm64" and self.has_enough_space:
-            self.download("torch", install=True, pytorch_backend="mps")
+            return_code = self.download("torch", install=True, pytorch_backend="mps")
         else:
-            self.download("ncnn")
+            return_code = self.download("ncnn")
+        return return_code
 
     def download(self, dep, install: bool = True, pytorch_backend:str = None):
         """
@@ -177,8 +179,9 @@ class DownloadTab:
         Parameters:
         - dep (str): The name of the dependency to download.
         Returns:
-        - None
+        - int: The return code of the download process (-1 if it did not run).
         """
+        return_code:int = -1
         pytorch_ver:TorchVersion|None = None
         current_pytorch_version = self.parent.pytorch_version.currentText().split()[0]
         current_pytorch_backend = self.parent.pytorch_backend.currentText().split()[0].lower() if not pytorch_backend else pytorch_backend
@@ -191,7 +194,7 @@ class DownloadTab:
             RegularQTPopup(
                 "Please select a valid PyTorch version from the dropdown."
             )
-            return
+            return return_code
         if current_pytorch_backend == "cuda" or dep.lower() == "tensorrt":
             pytorch_backend = pytorch_ver.cuda_version
         elif current_pytorch_backend == "rocm":
@@ -212,3 +215,5 @@ class DownloadTab:
                 )
             elif return_code != 0:
                 RegularQTPopup("Download Failed!\nPlease check logs for more info.")
+
+        return return_code

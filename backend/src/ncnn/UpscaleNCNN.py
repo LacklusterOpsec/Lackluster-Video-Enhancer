@@ -3781,6 +3781,7 @@ def get_broadcast_data(model: NcnnModel) -> tuple[int, int, int, int, str]:
 
 def getNCNNScale(modelPath: str = "") -> int:
     basename = os.path.basename(modelPath)
+    scale = 0
     try:
       modelParamPath = os.path.join(modelPath, basename + ".param")
       model = NcnnModel.load_from_file(modelParamPath)
@@ -3791,6 +3792,11 @@ def getNCNNScale(modelPath: str = "") -> int:
             if f"x{i}" in basename or f"{i}x" in basename.lower():
                 scale = i
                 break
+    if scale <= 0:
+        raise ValueError(
+            f"Unable to determine upscale scale for model {modelPath}. "
+            "Rename the model to include the scale (e.g. '2x_ModelName') or fix the .param file."
+        )
     return scale
 
 class UPSCALE:
@@ -3968,6 +3974,7 @@ class UpscaleWithNCNNMode:
       # Load model param and bin
       self.net.load_param(modelPath + ".param")
       self.net.load_model(modelPath + ".bin")
+      self._extractor = None
 
     def NCNNImageMatFromNP(self, npArray: np.array):
         return ncnn.Mat.from_pixels(
@@ -3987,8 +3994,9 @@ class UpscaleWithNCNNMode:
 
     def process_bytes(self, frame:bytes, *args, **kwargs) -> bytes:
         frame = np.ascontiguousarray(np.frombuffer(frame, dtype=np.uint8))
-        ex = self.net.create_extractor()
-        
+        if self._extractor is None:
+            self._extractor = self.net.create_extractor()
+        ex = self._extractor
         #frame = self.ClampNPArray(frame)
         frame = self.NCNNImageMatFromNP(frame)
         # norm
@@ -4161,8 +4169,9 @@ class UpscaleNCNN:
             sleep(1)
             
         img = self.net.process_bytes(imageChunk.get_frame_bytes(), self.width, self.height, 3)
-        retFrame = Frame(self.backend, self.width, self.height, imageChunk.device, gpu_id=imageChunk.gpu_id, hdr_mode=self.hdr_mode, dtype=imageChunk.dtype)
-        retFrame.set_frame_bytes(img)
-        return retFrame
+        dummyFrame = imageChunk.get_dummy_frame()
+        del imageChunk
+        return dummyFrame.resize_frame(
+            self.scale * self.width, self.scale * self.height).set_frame_bytes(img)
 
     

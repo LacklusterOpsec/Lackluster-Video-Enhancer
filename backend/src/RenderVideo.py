@@ -1,6 +1,8 @@
 from threading import Thread
 import os
 import math
+import threading
+import traceback
 from time import sleep, time
 from typing import Optional
 import sys
@@ -11,10 +13,25 @@ from .FFmpegBuffers import FFmpegRead, FFmpegWrite, MPVOutput
 from .FFmpeg import InformationWriteOut
 from .utils.Encoders import EncoderSettings
 from .utils.SceneDetect import SceneDetect
-from .utils.Util import log, resize_image_bytes
+from .utils.Util import log
 from .utils.BorderDetect import BorderDetect
 from .utils.VideoInfo import OpenCVInfo
 import numpy as np
+
+
+def global_thread_handler(args):
+    # args.exc_value contains the error
+    # args.exc_traceback contains the stack trace
+    tb_string = ''.join(
+        traceback.format_exception(args.exc_type, args.exc_value, args.exc_traceback)
+    )
+    print(f"Thread '{args.thread.name}' crashed. Full Traceback:\n{tb_string}")
+    print('Exiting application due to thread crash.', file=sys.stderr)
+    sleep(1)  # Give time for the print to flush
+    os._exit(1)
+
+
+threading.excepthook = global_thread_handler
 
 
 def remove_shared_memory_block(name):
@@ -68,7 +85,7 @@ class Render:
         # model settings
         upscaleModel=None,
         interpolateModel=None,
-        interpolateFactor: int = 1,
+        interpolateFactor: float = 1.0,
         extraRestorationModels=None,
         sceneDetectModel: str = None,
         tile_size=None,
@@ -113,8 +130,9 @@ class Render:
         self.interpolateFactor = interpolateFactor
         # max timestep is a hack to make sure ncnn cache frames too early, and ncnn breaks if i modify the code at all so ig this is what we are doing
         # also used to help with performace and caching
-        self.maxTimestep = (interpolateFactor - 1) / interpolateFactor
+        # must use ceilInterpolateFactor so the last timestep matches exactly for decimal factors
         self.ceilInterpolateFactor = math.ceil(self.interpolateFactor)
+        self.maxTimestep = (self.ceilInterpolateFactor - 1) / self.ceilInterpolateFactor
         
         # self.setupRender = self.returnFrame  # set it to not convert the bytes to array by default, and just pass chunk through
         self.setupFrame0 = None
@@ -332,65 +350,59 @@ class Render:
         """
 
         while True:
-            if not self.informationHandler.get_is_paused():
-                frame = self.readBuffer.get()
-                #self.write_bytes_to_cv2_frame_debug(frame)
-                if frame is None:
-                    self.informationHandler.stopWriting()
-                    break
-
-                for extraRestoration in self.extraRestorationModels:
-                    frame = extraRestoration(frame)
-
-                if self.interpolateModel:
-                    sceneDetect = self.sceneDetect.detect(frame)
-                    interpolated_frames = self.interpolateOption(
-                        img1=frame,
-                        transition=sceneDetect,
-                    )
-                    if not interpolated_frames:
-                        return
-                    
-                    for interpolated_frame in interpolated_frames:
-
-                        if self.upscaleModel:
-                            interpolated_frame = self.upscaleOption(
-                                interpolated_frame
-                            )
-                        if self.override_upscale_scale:
-                            interpolated_frame = resize_image_bytes(interpolated_frame.get_frame_bytes(),
-                                               width=self.width*self.modelScale,
-                                               height=self.height*self.modelScale,
-                                               target_width=self.width*self.override_upscale_scale,
-                                               target_height=self.height*self.override_upscale_scale,)
-                        self.informationHandler.setPreviewFrame(interpolated_frame.get_frame_bytes() if type(interpolated_frame) != bytes else interpolated_frame)
-                        self.informationHandler.setFramesRendered(frames_rendered)
-                        self.writeBuffer.writeQueue.put(interpolated_frame.get_frame_bytes() if type(interpolated_frame) != bytes else interpolated_frame)
-                
-                
-
-                if self.upscaleModel:
-                    frame = self.upscaleOption(
-                        frame
-                    )
-                
-                
-                
-                if self.override_upscale_scale:
-                    frame = resize_image_bytes(frame.get_frame_bytes(),
-                                               width=self.width*self.modelScale,
-                                               height=self.height*self.modelScale,
-                                               target_width=self.width*self.override_upscale_scale,
-                                               target_height=self.height*self.override_upscale_scale,)
-
-                
-                self.informationHandler.setFramesRendered(frames_rendered)
-                self.informationHandler.setPreviewFrame(frame.get_frame_bytes() if type(frame) != bytes else frame)
-                
-                self.writeBuffer.writeQueue.put(frame.get_frame_bytes() if type(frame) != bytes else frame)
-                frames_rendered += int(self.ceilInterpolateFactor)
-            else:
+            if self.informationHandler.get_is_paused():
                 sleep(1)
+                continue
+
+            frame = self.readBuffer.get()
+            #self.write_bytes_to_cv2_frame_debug(frame)
+            if frame is None:
+                self.informationHandler.stopWriting()
+                break
+
+            if self.interpolateModel:  # detect scene changes before any calculations, as cv2 misbehaves on AI-processed frames
+                sceneDetect = self.sceneDetect.detect(frame)
+
+            for extraRestoration in self.extraRestorationModels:
+                frame = extraRestoration(frame)
+
+            if self.interpolateModel:
+                interpolated_frames = self.interpolateOption(
+                    img1=frame,
+                    transition=sceneDetect,
+                )
+
+                for interpolated_frame in interpolated_frames:
+
+                    if self.upscaleModel:
+                        interpolated_frame = self.upscaleOption(
+                            interpolated_frame
+                        )
+                    if self.override_upscale_scale:
+                        interpolated_frame = interpolated_frame.resize_frame(
+                            self.width * self.override_upscale_scale,
+                            self.height * self.override_upscale_scale,
+                        )
+                    bytes_out = interpolated_frame.get_frame_bytes() if type(interpolated_frame) != bytes else interpolated_frame
+                    self.informationHandler.update(bytes_out)
+                    self.writeBuffer.writeQueue.put(bytes_out)
+
+            if self.upscaleModel:
+                frame = self.upscaleOption(
+                    frame
+                )
+
+            if self.override_upscale_scale:
+                frame = frame.resize_frame(
+                    self.width * self.override_upscale_scale,
+                    self.height * self.override_upscale_scale,
+                )
+
+            bytes_out = frame.get_frame_bytes() if type(frame) != bytes else frame
+            self.informationHandler.update(bytes_out)
+
+            self.writeBuffer.writeQueue.put(bytes_out)
+            frames_rendered += int(self.ceilInterpolateFactor)
         self.writeBuffer.writeQueue.put(None)
         """
         tracer.stop()

@@ -1,3 +1,23 @@
+# RVE 2.4.2
+### Added
+ - Decimal frame timestep support.
+### Fixed
+ - FFmpeg read randomly stopping mid-render (thanks @potocpav).
+ - Vertical/rotated (iPhone) videos failing to render.
+ - PySceneDetect misbehaving when restoration models are enabled.
+ - Render thread crashes hanging the app (global thread exception handler).
+ - Pause/resume race at startup with shared-memory pause block.
+ - NCNN scale detection crashing on models without a scale in the filename.
+ - Segmented scene detect only evaluating a fraction of the image.
+ - NCNN upscale frames reporting the wrong (pre-scale) dimensions.
+ - Progress/ETA undercounting frames and incorrect FPS after pausing.
+### Changed
+ - AV1 / AV1 NVENC quality presets adjusted.
+ - Failed simple-install now exits instead of launching a broken UI.
+ - Performance: removed a global CUDA sync and redundant tensor clone per frame.
+ - Performance: scene detection now downscales on the GPU.
+ - Performance: output override scale resize moved off the CPU path.
+ - Performance: NCNN fallback reuses its extractor.
 # RVE 2.4.1
 ### Fixed
  - Sudo scene detect models on non-nvidia gpus.

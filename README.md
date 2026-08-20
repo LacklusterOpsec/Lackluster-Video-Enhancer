@@ -1,12 +1,36 @@
 # REAL Video Enhancer
 <h1>NOTICE</h1>
-<h3>This project is archived until further notice.</h3>
+<h3>This is an actively maintained fork of REAL Video Enhancer with bug fixes, stability improvements, and performance optimizations applied on top of the archived upstream.</h3>
+
+## Changes in this fork
+
+**Bug fixes**
+- Fixed FFmpeg reading randomly stopping mid-render (`-nostdin` on the reader process)
+- Fixed rotated / iPhone portrait videos failing to render (rotation-aware dimensions, safe crop clamping, `-noautorotate` in border detection)
+- Fixed PySceneDetect misbehaving when restoration models are enabled
+- Fixed render-thread crashes hanging the whole app (global exception handler with traceback)
+- Fixed pause/resume race with shared-memory pause block at startup
+- Fixed NCNN scale detection crashing when a model name does not include the scale
+- Fixed segmented scene detection only evaluating part of the image
+- Fixed NCNN upscale frames reporting pre-scale dimensions
+- Fixed decimal (non-integer) interpolation frame timing and cache step
+- Fixed progress/ETA undercounting and wrong FPS after pausing
+- Failed simple-install now exits cleanly instead of launching a broken UI
+
+**Performance / stability**
+- Removed a global CUDA synchronization and a redundant tensor clone per frame
+- Scene detection now downscales on the GPU (no full-res frame copy to CPU per frame)
+- Output override scale resizing moved off the CPU path (GPU resize when available)
+- NCNN fallback reuses its extractor instead of allocating per frame
+- TensorRT engine build now clears VRAM after compiling
+- AV1 / AV1 NVENC quality presets adjusted
+- Version bumped to 2.4.2
 
 ![Visitors](https://api.visitorbadge.io/api/visitors?path=https%3A%2F%2Fgithub.com%2FTNTwise%2FREAL-Video-enhancer%2F&countColor=%23263759)
 [![pypresence](https://img.shields.io/badge/using-pypresence-00bb88.svg?style=for-the-badge&logo=discord&logoWidth=20)](https://github.com/qwertyquerty/pypresence)
 
 ![license](https://img.shields.io/github/license/tntwise/real-video-enhancer)
-![Version](https://img.shields.io/badge/Version-2.4.1-blue)
+![Version](https://img.shields.io/badge/Version-2.4.2-blue)
 ![downloads_total](https://img.shields.io/github/downloads/tntwise/REAL-Video-Enhancer/total.svg?label=downloads%40total)
 <a href="https://discord.gg/hwGHXga8ck">
       <img src="https://img.shields.io/discord/1041502781808328704?label=Discord" alt="Discord Shield"/></a>

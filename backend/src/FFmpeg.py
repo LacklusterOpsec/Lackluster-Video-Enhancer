@@ -34,18 +34,19 @@ class PauseManager:
         self.prevState = None
         self.paused_shared_memory_id = paused_shared_memory_id
         if self.paused_shared_memory_id is not None:
-            try:
-                self.pausedSharedMemory = shared_memory.SharedMemory(
-                    name=self.paused_shared_memory_id
-                )
-            except FileNotFoundError:
-                log(f"FileNotFoundError! Creating new paused shared memory: {self.paused_shared_memory_id}")
-                self.pausedSharedMemory = shared_memory.SharedMemory(
-                    name=self.paused_shared_memory_id, create=True, size=1
-                )
+            while True:
+                try:
+                    self.pausedSharedMemory = shared_memory.SharedMemory(
+                        name=self.paused_shared_memory_id
+                    )
+                    break
+                except FileNotFoundError:
+                    log(f"Waiting for shared memory to be created: {self.paused_shared_memory_id}")
+                    time.sleep(0.5)
     def pause_manager(self):
         if self.paused_shared_memory_id is not None:
             return self.pausedSharedMemory.buf[0] == 1
+        return False
 
 class InformationWriteOut:
     def __init__(
@@ -73,6 +74,7 @@ class InformationWriteOut:
         self.previewFrame = None
         self.last_length = 0
         self.framesRendered = 1
+        self.total_paused_time_seconds = 0
         self.hdr_mode = hdr_mode
         self.sharedMemoryChunkSize = sharedMemoryChunkSize
 
@@ -133,6 +135,10 @@ class InformationWriteOut:
     def setFramesRendered(self, framesRendered: int):
         self.framesRendered = framesRendered
 
+    def update(self, preview_frame):
+        self.previewFrame = preview_frame
+        self.framesRendered += 1
+
     def stopWriting(self):
         self.stop = True
 
@@ -145,10 +151,21 @@ class InformationWriteOut:
             log(f"Shared memory name: {self.shm.name}")
         i = 0
         while not self.stop:
-            
+            time.sleep(0.5)  # setting this to a higher value will reduce the cpu usage, and increase fps
+            self.isPaused = self.pausedManager.pause_manager()
+
+            if self.isPaused:
+                pause_start_time = time.time()
+                while self.isPaused and not self.stop:
+                    self.isPaused = self.pausedManager.pause_manager()
+                    time.sleep(0.5)
+                paused_duration = time.time() - pause_start_time
+                self.total_paused_time_seconds += paused_duration
+
             if self.previewFrame is not None and self.framesRendered > 0:
                 # print out data to stdout
-                fps = round(self.framesRendered / (time.time() - self.startTime))
+                active_time = time.time() - self.startTime - self.total_paused_time_seconds
+                fps = round(self.framesRendered / max(active_time, 1))
                 eta = self.calculateETA(framesRendered=self.framesRendered)
                 message = f"FPS: {fps} Current Frame: {self.framesRendered} ETA: {eta}"
                 if i == 0:
@@ -157,22 +174,22 @@ class InformationWriteOut:
                 self.realTimePrint(message)
                 if self.sharedMemoryID is not None and self.previewFrame is not None:
                     # Update the shared array
-                    if self.border_detect:
-                        padded_frame = padFrame(
-                            self.previewFrame,
-                            self.width,
-                            self.height,
-                            self.croppedOutputWidth,
-                            self.croppedOututHeight,
-                        )
-                        try:
-                            self.shm.buf[:self.sharedMemoryChunkSize] = bytes(padded_frame)
-                        except Exception:
-                            pass
-                    else:
-                        try:
-                            self.shm.buf[:self.sharedMemoryChunkSize] = bytes(self.previewFrame)
-                        except Exception:
-                            pass
-                self.isPaused = self.pausedManager.pause_manager()
-            time.sleep(0.5) # setting this to a higher value will reduce the cpu usage, and increase fps
+                    try:
+                        if self.border_detect:
+                            padded_frame = padFrame(
+                                self.previewFrame,
+                                self.width,
+                                self.height,
+                                self.croppedOutputWidth,
+                                self.croppedOututHeight,
+                            )
+                            frame_to_write = bytes(padded_frame)
+                        else:
+                            frame_to_write = (
+                                bytes(self.previewFrame)
+                                if type(self.previewFrame) is not bytes
+                                else self.previewFrame
+                            )
+                        self.shm.buf[:self.sharedMemoryChunkSize] = frame_to_write
+                    except Exception as e:
+                        log("Failed to write preview frame to shared memory: " + str(e))

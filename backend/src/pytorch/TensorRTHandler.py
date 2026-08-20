@@ -127,6 +127,13 @@ class TorchTensorRTHandler:
                 2: trt.InterpolationMode.CUBIC,
             }
         )
+        try:
+            from torch._decomp import get_decompositions
+            exported_program = exported_program.run_decompositions(
+                get_decompositions([torch.ops.aten.grid_sampler_2d])
+            )
+        except Exception as e:
+            log("grid_sampler decomposition unavailable, skipping: " + str(e))
         return exported_program
 
     def check_engine_exists(self, trt_engine_name: str) -> bool:

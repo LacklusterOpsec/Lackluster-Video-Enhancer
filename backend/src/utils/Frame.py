@@ -72,7 +72,6 @@ class Frame:
             raise TypeError(f"Expected torch.Tensor, got {type(frame).__name__}")
         self._invalidate_cache("tensor")
         self._tensor = frame.clone()
-        _torch_utils.sync_all_streams()
         return self
 
     def set_frame_np(self, frame: Any) -> "Frame":
@@ -100,7 +99,7 @@ class Frame:
         if clear_cache:
             self._invalidate_cache("tensor")
             
-        return self._tensor.clone() # this helps so the frame wont be overwritten? have to test later.
+        return self._tensor
 
     def get_frame_bytes(self, clear_cache: bool = False) -> bytes:
         if self._bytes is None:
@@ -170,6 +169,29 @@ class Frame:
             # Convert from HDR (uint16) to SDR (uint8)
             np_frame = (np.clip(np_frame.astype(np.float32) / 65535.0, 0, 1) * 255).astype(np.uint8)
         return np_frame
+
+    def get_np_sdr_resized(self, target_width: int, target_height: int):
+        """
+        Get the frame as a small SDR numpy array (uint8) resized to the target
+        dimensions. If a GPU tensor is available the downscale happens on the
+        GPU so only the small result is transferred back to the CPU.
+        """
+        if self._tensor is not None:
+            resized = _torch_utils.resize_tensor(
+                self._tensor, target_width, target_height
+            )
+            return (
+                resized.squeeze(0)
+                .permute(1, 2, 0)
+                .clamp(0.0, 1.0)
+                .mul(255.0)
+                .to(_torch.uint8)
+                .contiguous()
+                .cpu()
+                .numpy()
+            )
+        np_frame = self.get_np_sdr()
+        return resize_image_np(np_frame, target_width, target_height)
 
     
     def clone(self) -> "Frame":

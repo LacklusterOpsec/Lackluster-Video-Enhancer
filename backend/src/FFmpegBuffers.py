@@ -2,8 +2,10 @@ import queue
 import sys
 from abc import ABC, abstractmethod
 import os
+import pathlib
+import shlex
 import subprocess
-import queue
+import tempfile
 import time
 import cv2
 import numpy as np
@@ -71,10 +73,11 @@ class FFmpegRead(Buffer):
                 self.inputFrameChunkSize = width * height * 3
         command = self.command()
         log("FFMPEG READ COMMAND: " + str(command))
+        self.stderr_file = tempfile.TemporaryFile(mode="w+", encoding="utf-8", errors="replace")
         self.readProcess = subprocess_popen_without_terminal(
             self.command(),
             stdout=subprocess.PIPE,
-            stderr=subprocess.DEVNULL,
+            stderr=self.stderr_file,
         )
         self.readQueue = queue.Queue(maxsize=25)
 
@@ -82,11 +85,14 @@ class FFmpegRead(Buffer):
         
         command = [
             f"{self.ffmpeg_path}",
+            "-loglevel",
+            "error",
+            "-nostdin",
             "-i",
             f"{self.inputFile}",
         ]
 
-        filter_string = f"crop={self.width}:{self.height}:{self.borderX}:{self.borderY},scale=w=iw*sar:h=ih" #+ ":in_range=limited:out_range=full,format=yuv420p" if self.yuv420pMOD == "yuv420p" else "" # fix dar != sar
+        filter_string = f"crop=min({self.width}\\,max(1\\,iw-{self.borderX})):min({self.height}\\,max(1\\,ih-{self.borderY})):{self.borderX}:{self.borderY},scale=if(gt(sar\\,0)\\,trunc(iw*max(sar\\,0)/2)*2\\,iw):ih,setsar=1" #+ ":in_range=limited:out_range=full,format=yuv420p" if self.yuv420pMOD == "yuv420p" else "" # fix dar != sar
         #if not self.hdr_mode:
         #    if self.input_pixel_format == "yuv420p":
         #        filter_string += ":in_range=tv:out_range=pc" # color shifts a smidgen but helps with artifacts when converting yuv to raw
@@ -143,7 +149,12 @@ class FFmpegRead(Buffer):
 
     def close(self):
         self.readProcess.stdout.close()
+        if self.readProcess.returncode != 0:
+            self.stderr_file.seek(0)
+            stderr_output = self.stderr_file.read()
+            log("FFmpeg Read Process stderr:\n" + str(stderr_output))
         self.readProcess.terminate()
+        self.stderr_file.close()
 
 
 class FFmpegWrite(Buffer):
@@ -164,7 +175,7 @@ class FFmpegWrite(Buffer):
         benchmark: bool,
         slowmo_mode: bool,
         upscaleTimes: int,
-        interpolateFactor:int,
+        interpolateFactor: float,
         ceilInterpolateFactor: int,
         video_encoder: EncoderSettings,
         audio_encoder: EncoderSettings,
@@ -219,6 +230,11 @@ class FFmpegWrite(Buffer):
             if not self.slowmo_mode
             else self.fps
         )
+        # inputFPS reflects the actual rate of frames the model produces (using ceil).
+        # For integer factors, inputFPS == outputFPS (no frame dropping).
+        # For decimal factors (e.g. 2.5x), inputFPS > outputFPS and FFmpeg
+        # drops the excess frames to achieve the correct target FPS.
+        self.inputFPS = self.fps * self.ceilInterpolateFactor
         self.ffmpeg_log = open(self.ffmpeg_log_file, "w", encoding='utf-8')
         try:
             command = self.command()
@@ -242,7 +258,7 @@ class FFmpegWrite(Buffer):
                 "-loglevel",
                 "error",
                 "-framerate",
-                f"{self.outputFPS}",
+                f"{self.inputFPS}",
                 "-f",
                 "rawvideo",
                 "-pix_fmt",
@@ -305,7 +321,7 @@ class FFmpegWrite(Buffer):
 
             command += [
                 "-framerate",
-                f"{self.outputFPS}",
+                f"{self.inputFPS}",
                 "-f",
                 "rawvideo",
                 "-pix_fmt",
@@ -316,8 +332,6 @@ class FFmpegWrite(Buffer):
                 f"{self.outputWidth}x{self.outputHeight}",
                 "-i",
                 "-",
-                "-r",
-                f"{self.outputFPS}",
             ]
 
             if not self.slowmo_mode:
@@ -334,6 +348,10 @@ class FFmpegWrite(Buffer):
                     "1:a?",
                     "-map",
                     "1:s?",
+                    "-map_metadata:s:v",
+                    "1:s:v",  # Copy video stream metadata from input 1 (the original file) to the video output
+                    "-metadata:s:v",
+                    "rotate=0",  # Ensure custom rotation is stripped as the output is physically rotated
                 ]
 
                 # Output timestamp/interleave hygiene.
@@ -348,11 +366,16 @@ class FFmpegWrite(Buffer):
                     "0",
                 ]
 
-                
+            # Output frame rate must come after all -i inputs
+            # so FFmpeg treats it as an output option, not an input option.
+            command += [
+                "-r",
+                f"{self.outputFPS}",
+            ]
 
             if self.custom_encoder is not None:
 
-                for i in self.custom_encoder.split():
+                for i in shlex.split(self.custom_encoder):
                     command.append(i)
             else:
                 if not self.audio_encoder.getPresetTag() == "copy_audio":
@@ -433,7 +456,7 @@ class FFmpegWrite(Buffer):
                 "-pix_fmt",
                 "rgb48le" if self.hdr_mode else "rgb24",
                 "-r",
-                str(self.outputFPS),
+                str(self.inputFPS),
                 "-i",
                 "-",
                 "-benchmark",

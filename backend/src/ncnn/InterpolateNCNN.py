@@ -184,7 +184,7 @@ class InterpolateRIFENCNN:
             self.render.process_bytes(
                 self.frame0, img1.get_frame_bytes(), self.max_timestep
             )  # get the cache to skip to next frame
-            self.frame0 = img1
+            self.frame0 = img1.get_frame_bytes()
             
             for n in range(self.interpolateFactor - 1):
                 yield img1
@@ -197,4 +197,4 @@ class InterpolateRIFENCNN:
             retFrame = Frame(self.backend, self.width, self.height, img1.device, gpu_id=img1.gpu_id, hdr_mode=self.hdr_mode, dtype=img1.dtype)
             retFrame.set_frame_bytes(frame)
             yield retFrame
-        self.frame0 = img1
+        self.frame0 = img1.get_frame_bytes()

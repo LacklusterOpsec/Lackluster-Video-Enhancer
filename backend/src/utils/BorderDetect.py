@@ -10,6 +10,7 @@ class BorderDetect:
     def processBorders(self):
         command = [
             f"{self.ffmpeg_path}",
+            "-noautorotate",
             "-i",
             f"{self.inputFile}",
             "-vf",
