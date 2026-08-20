@@ -152,11 +152,11 @@ class ApplicationUpdater:
         FileHandler.makeExecutable(EXE_PATH)
 
     def build_download_url(self):
-        url = f"https://github.com/tntwise/real-video-enhancer/releases/download/{self.tag}/{self.file_name}"
+        url = f"https://github.com/LacklusterOpsec/Lackluster-Video-Enhancer/releases/download/{self.tag}/{self.file_name}"
         return url
 
     def get_latest_version_tag(self, clean_tag=False) -> str:
-        url = "https://api.github.com/repos/tntwise/real-video-enhancer/releases/latest"
+        url = "https://api.github.com/repos/LacklusterOpsec/Lackluster-Video-Enhancer/releases/latest"
         response = requests.get(url)
         if response.status_code == 200:
             latest_release = response.json()

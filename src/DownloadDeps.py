@@ -88,7 +88,7 @@ class Backend(Dependency):
 
 
     def get_download_link(self) -> str:
-        backend_url = f"https://github.com/TNTwise/REAL-Video-Enhancer/releases/download/RVE-{version}/backend-v{version}.tar.gz"
+        backend_url = f"https://github.com/LacklusterOpsec/Lackluster-Video-Enhancer/releases/download/RVE-{version}/backend-v{version}.tar.gz"
         return backend_url
     
     def download(self):

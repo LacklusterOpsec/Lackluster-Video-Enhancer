@@ -214,6 +214,11 @@ class PyInstaller(BuildManager):
             + f" {OUTPUT_FOLDER}"
             )
         )
+        # ship the changelog with the app so the home tab can show it offline
+        shutil.copy(
+            "CHANGELOG.md",
+            os.path.join(OUTPUT_FOLDER, "REAL-Video-Enhancer", "CHANGELOG.md"),
+        )
 
     def patch_for_xcbcursor(self):
         if PLATFORM == "linux":
