@@ -172,6 +172,8 @@ jobs:
     needs: [validate]
     runs-on: macos-15-intel
     permissions: write-all  
+    env:
+      HOMEBREW_NO_REQUIRE_TAP_TRUST: 1
     steps:
 
       - uses: actions/checkout@v5
@@ -185,8 +187,10 @@ jobs:
 
         run: |
 
+          brew untap aws/tap || true
           brew install llvm@15
-          brew install pyside
+          brew link --overwrite llvm@15
+          brew install pyside@6
           python3 -m pip install -r requirements.txt
 
       - name: Build
@@ -208,6 +212,8 @@ jobs:
     runs-on: macos-14
 
     permissions: write-all  
+    env:
+      HOMEBREW_NO_REQUIRE_TAP_TRUST: 1
     steps:
       - uses: actions/checkout@v5
 
@@ -220,6 +226,7 @@ jobs:
 
       - name: Install Python Dependencies
         run: |
+          brew untap aws/tap || true
           brew install pyside@6
           python3 -m pip install -r requirements.txt
 
@@ -245,23 +252,15 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/download-artifact@v6
+      - uses: actions/download-artifact@v8
         with:
           path: artifacts
-      - name: Generate version and tag
-        id: version_tag
+      - name: Generate release body
         run: |
           git clone https://github.com/LacklusterOpsec/Lackluster-Video-Enhancer.git --branch v2-main real-video-enhancer
           cp real-video-enhancer/CHANGELOG.md .
-          version=$(python -c "from datetime import datetime; print(str(datetime.now()).split(' ')[0].replace('-',''))")
-          tag=$(python -c "import random, string; print(''.join(random.choices(string.ascii_letters, k=8)))")
           python3 real-video-enhancer/scripts/printchangelog.py > RELEASE_BODY.md
           cat real-video-enhancer/EXTRA_NOTES.md >> RELEASE_BODY.md
-          echo "Version=$version"
-          echo "Tag=$version"
-          echo "Body=$body"
-          echo "::set-output name=version::$version"
-          echo "::set-output name=tag::$version"
 
       #- name: Compute SHA256 checksums
       #  run: |
@@ -272,7 +271,7 @@ jobs:
       #    done
 
       - name: Create Release and Upload Release Asset
-        uses: softprops/action-gh-release@v2        
+        uses: softprops/action-gh-release@v3        
         with:
           name: REAL Video Enhancer ${{ env.APP_VERSION }} Pre-Release
           tag_name: RVE-${{ env.APP_VERSION }}
