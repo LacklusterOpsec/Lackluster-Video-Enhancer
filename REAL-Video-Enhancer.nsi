@@ -10,7 +10,7 @@
   !define APPFILE "REAL-Video-Enhancer.exe"
   !define VERSION "2.4.3"
   !define SLUG "${NAME} v${VERSION}"
-  !define COMPANYNAME "TNTwise"
+  !define COMPANYNAME "LacklusterOpsec"
   !define VERSIONMAJOR 2
   !define VERSIONMINOR 4
   !define VERSIONBUILD 3 
