@@ -10,7 +10,7 @@ _pytorch_stream = None
 _torch_utils = None
 _torch = None
 
-def _init_pytorch(device, gpu_id, dtype, width, height, hdr_mode):
+def _init_pytorch(device, gpu_id, dtype, width, height, hdr_mode, backend="pytorch"):
     global _pytorch_device, _pytorch_dtype, _torch_utils, _torch, _pytorch_stream
     if _torch_utils is None:
         import torch
@@ -25,7 +25,7 @@ def _init_pytorch(device, gpu_id, dtype, width, height, hdr_mode):
             )
         _pytorch_stream = _torch_utils.init_stream(gpu_id=gpu_id)
         _pytorch_device = _torch_utils.handle_device(device, gpu_id)
-        _pytorch_dtype = _torch_utils.handle_precision(dtype)
+        _pytorch_dtype = _torch_utils.handle_precision(dtype, backend=backend)
         print("Initialized Frame PyTorch utils")
 
 
@@ -45,7 +45,7 @@ class Frame:
         self._bytes: Optional[bytes] = None
         
         if backend in ("pytorch", "tensorrt"):
-            _init_pytorch(device, gpu_id, dtype, width, height, hdr_mode)
+            _init_pytorch(device, gpu_id, dtype, width, height, hdr_mode, backend=backend)
 
     def _invalidate_cache(self, keep: str):
         """Clear cached representations except the one being set."""

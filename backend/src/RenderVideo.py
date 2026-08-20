@@ -25,8 +25,8 @@ def global_thread_handler(args):
     tb_string = ''.join(
         traceback.format_exception(args.exc_type, args.exc_value, args.exc_traceback)
     )
-    print(f"Thread '{args.thread.name}' crashed. Full Traceback:\n{tb_string}")
-    print('Exiting application due to thread crash.', file=sys.stderr)
+    print(f"Thread '{args.thread.name}' crashed. Full Traceback:\n{tb_string}", file=sys.stderr, flush=True)
+    print('Exiting application due to thread crash.', file=sys.stderr, flush=True)
     sleep(1)  # Give time for the print to flush
     os._exit(1)
 

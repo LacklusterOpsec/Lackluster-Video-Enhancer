@@ -13,6 +13,7 @@ class HomeTab:
 
     def getChangelog(self):
         changeLog = ""
+        fetched_tag = ""
         try:
             response = requests.get(
                 "https://api.github.com/repos/LacklusterOpsec/Lackluster-Video-Enhancer/releases"
@@ -23,12 +24,22 @@ class HomeTab:
             for releaseTag, releaseBody in zip(releaseTags, releaseBodies):
                 changeLog += "\n# " + releaseTag
                 changeLog += "\n" + releaseBody
+            if releaseTags:
+                fetched_tag = releaseTags[0].replace("RVE-", "")
         except Exception:
             pass
+        # Prefer the CHANGELOG.md bundled with the app over older GitHub release
+        # text: the home tab should report what we actually shipped.
         if not changeLog.strip():
-            # No releases on this fork yet (or no network): fall back to the
-            # CHANGELOG.md bundled with the app.
             changeLog = self._local_changelog()
+        else:
+            try:
+                fetched = tuple(map(int, fetched_tag.split(".")))
+                local = tuple(map(int, "2.4.3".split(".")))
+                if fetched < local:
+                    changeLog = self._local_changelog()
+            except Exception:
+                pass
         return changeLog
 
     def _local_changelog(self):
