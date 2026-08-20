@@ -15,7 +15,7 @@
  - Progress/ETA undercounting frames and incorrect FPS after pausing.
  - PyInstaller build error on Python 3.11 (`backports` runtime import); `build.py` no longer force-recreates an existing venv.
  - TensorRT engine builds no longer fail on Ampere+/Blackwell GPUs when using `auto` precision (bf16 is not supported for TensorRT engines; `auto` now uses fp16 for the TensorRT backend, while bf16 remains available for the PyTorch backend).
- - RIFE TensorRT ghosting / flash artifacts on torch-tensorrt 2.13 (TRT 11) fixed by using the native `grid_sampler` path instead of the old manual decomposition.
+ - RIFE TensorRT ghosting / checkerboard / white-patch artifacts on TRT 11 (Blackwell) fixed: engines are now built strict fp16 (no mixed-precision `use_explicit_typing`, which is broken for `grid_sample` upstream - pytorch/TensorRT#4074) and the warp keeps fp16 end-to-end, matching the known-good ComfyUI-Rife-Tensorrt path.
  - macOS CI builds fixed (Homebrew tap trust + llvm linking).
  - GitHub Actions migrated to Node 24 runtimes.
 ### Changed

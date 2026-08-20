@@ -15,7 +15,7 @@ class InferenceSceneChangeDetectEfficientNet:
                  model_backend="pytorch",
                  ):
         self.threshold = threshold * .1
-        model_dtype = TorchUtils.handle_precision(model_dtype)
+        model_dtype = TorchUtils.handle_precision(model_dtype, backend=model_backend)
         model_device = TorchUtils.handle_device(model_device)
         self.model = torch.jit.load(model_path, map_location=model_device).to(dtype=model_dtype)
         self.model.eval()
