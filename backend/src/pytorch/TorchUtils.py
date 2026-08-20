@@ -150,9 +150,12 @@ class TorchUtils:
         return torchdevice
 
     @staticmethod
-    def handle_precision(precision) -> torch.dtype:
+    def handle_precision(precision, backend: str = "pytorch") -> torch.dtype:
         log(f"Handling precision: {precision}")
         if precision == "auto":
+            if backend == "tensorrt":
+                # TensorRT engines do not support bf16; never resolve auto -> bf16 for TRT
+                return torch.float16 if backendDetect.get_half_precision() else torch.float32
             # prefer bf16 on Ampere+ (sm_80+) GPUs: same speed as fp16 with
             # better dynamic range (no overflow on bright/HDR content)
             if backendDetect.get_bf16_support():
@@ -163,6 +166,9 @@ class TorchUtils:
         if precision == "float16":
             return torch.float16
         if precision == "bfloat16":
+            if backend == "tensorrt":
+                log("TensorRT does not support bfloat16 engines, using float16 instead")
+                return torch.float16 if backendDetect.get_half_precision() else torch.float32
             return torch.bfloat16
         return torch.float32
 

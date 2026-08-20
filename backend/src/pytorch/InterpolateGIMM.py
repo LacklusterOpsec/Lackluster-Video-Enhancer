@@ -55,7 +55,7 @@ class InterpolateGIMMTorch(BaseInterpolate):
             device_type=device,
         )
         self.device = self.torchUtils.handle_device(device, gpu_id=gpu_id)
-        self.dtype = self.torchUtils.handle_precision(dtype)
+        self.dtype = self.torchUtils.handle_precision(dtype, backend=backend)
         if ensemble:
             print("Ensemble is not implemented for GIMM, disabling", file=sys.stderr)
         if dynamicScaledOpticalFlow:

@@ -92,7 +92,7 @@ class UpscalePytorch:
     ):
         self.torchUtils = TorchUtils(width=width, height=height,hdr_mode=hdr_mode,device_type=device)  
         device = self.torchUtils.handle_device(device, gpu_id=gpu_id)
-        self.dtype = self.torchUtils.handle_precision(precision)
+        self.dtype = self.torchUtils.handle_precision(precision, backend=backend)
         self.tile_pad = tile_pad
         self.device = device
         self.videoWidth = width

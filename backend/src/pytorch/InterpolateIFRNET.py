@@ -62,7 +62,7 @@ class InterpolateIFRNetTorch(BaseInterpolate):
             device_type=device
         )
         self.device = self.torchUtils.handle_device(device, gpu_id=gpu_id)
-        self.dtype = self.torchUtils.handle_precision(dtype)
+        self.dtype = self.torchUtils.handle_precision(dtype, backend=backend)
         self.tenFlow_div = torch.tensor(
         [(self.pw - 1.0) / 2.0, (self.ph - 1.0) / 2.0],
             dtype=torch.float32,

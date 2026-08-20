@@ -49,7 +49,7 @@ class InterpolateRifeTorch(BaseInterpolate):
         self.height = height
         self.device_type = device
         self.device: torch.device = TorchUtils.handle_device(device, gpu_id=gpu_id)
-        self.dtype = TorchUtils.handle_precision(dtype)
+        self.dtype = TorchUtils.handle_precision(dtype, backend=backend)
         self.backend = backend
         self.ceilInterpolateFactor = ceilInterpolateFactor
         self.dynamicScaledOpticalFlow = dynamicScaledOpticalFlow
