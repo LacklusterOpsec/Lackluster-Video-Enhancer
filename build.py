@@ -209,6 +209,7 @@ class PyInstaller(BuildManager):
             + " --noconfirm"
             + " --noupx" 
             + " --noconsole" # i think this fixes weird macos dir shit
+            + " --hidden-import=backports.tarfile" # setuptools vendor jaraco fallback on py<3.12
             + " --distpath"
             + f" {OUTPUT_FOLDER}"
             )
@@ -285,7 +286,7 @@ if __name__ == "__main__":
     args.add_argument("--build", help="Build the application with a specific builder.", default="gui", choices=["pyinstaller", "cx_freeze", "nuitka", "gui"])
     args.add_argument("--copy_backend", help="Copy the backend to the build directory", action="store_true")    
     args = args.parse_args()
-    if not os.path.exists("venv") or not args.build == "gui":
+    if not os.path.exists("venv"):
         BuildManager().python_manager.setup_python()
     BuildManager().build_gui()
     if args.run:

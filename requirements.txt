@@ -11,4 +11,5 @@ yt-dlp
 validators
 packaging
 pillow
+backports-tarfile
 

@@ -9,3 +9,9 @@ __pycache__/
 build
 dist
 venv
+
+# Generated build artifacts
+mainwindow.py
+resources_rc.py
+*.spec
+*.log

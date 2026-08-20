@@ -3,7 +3,7 @@ name: build-prerelease
 on:
   pull_request:
     branches:
-      - main
+      - v2-main
   workflow_dispatch:
 
 env:
@@ -27,14 +27,14 @@ jobs:
             exit 0
           fi
 
-          if [[ "$event" == "workflow_dispatch" && "$ref" == "refs/heads/dev" ]]; then
-            echo "OK: manual dispatch on dev"
+          if [[ "$event" == "workflow_dispatch" && "$ref" == "refs/heads/v2-main" ]]; then
+            echo "OK: manual dispatch on v2-main"
             exit 0
           fi
 
           echo "ERROR: This workflow is only allowed on:"
           echo "  - pull_request"
-          echo "  - workflow_dispatch on refs/heads/dev"
+          echo "  - workflow_dispatch on refs/heads/v2-main"
           echo "Got: event=$event ref=$ref"
           exit 1
 
@@ -255,7 +255,7 @@ jobs:
       - name: Generate version and tag
         id: version_tag
         run: |
-          git clone https://github.com/tntwise/real-video-enhancer --branch dev
+          git clone https://github.com/LacklusterOpsec/Lackluster-Video-Enhancer.git --branch v2-main
           cp real-video-enhancer/CHANGELOG.md .
           version=$(python -c "from datetime import datetime; print(str(datetime.now()).split(' ')[0].replace('-',''))")
           tag=$(python -c "import random, string; print(''.join(random.choices(string.ascii_letters, k=8)))")
@@ -266,7 +266,7 @@ jobs:
           echo "Body=$body"
           echo "::set-output name=version::$version"
           echo "::set-output name=tag::$version"
-          
+
       #- name: Compute SHA256 checksums
       #  run: |
       #    for file in artifacts/*; do
@@ -275,10 +275,6 @@ jobs:
       #      done
       #    done
 
-      - name: Download flatpakref
-        run: |
-          wget https://dl.flathub.org/repo/appstream/io.github.tntwise.REAL-Video-Enhancer.flatpakref
-          
       - name: Create Release and Upload Release Asset
         uses: softprops/action-gh-release@v1        
         with:
@@ -295,5 +291,4 @@ jobs:
               artifacts/REAL-Video-Enhancer-${{ env.APP_VERSION }}-Linux-portable_arm64.zip/REAL-Video-Enhancer-${{ env.APP_VERSION }}-Linux-portable_arm64.zip
               artifacts/REAL-Video-Enhancer-${{ env.APP_VERSION }}-MacOS_x86_64.zip/REAL-Video-Enhancer-${{ env.APP_VERSION }}-MacOS_x86_64.zip
               artifacts/REAL-Video-Enhancer-${{ env.APP_VERSION }}-MacOS_arm64.zip/REAL-Video-Enhancer-${{ env.APP_VERSION }}-MacOS_arm64.zip
-              io.github.tntwise.REAL-Video-Enhancer.flatpakref
               artifacts/backend-v${{ env.APP_VERSION }}.tar.gz/backend-v${{ env.APP_VERSION }}.tar.gz
