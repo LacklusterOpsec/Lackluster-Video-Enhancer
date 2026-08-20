@@ -260,7 +260,7 @@ class HandleApplication:
         )
         parser.add_argument(
             "--precision",
-            help="sets precision for model, (auto/float16/float32, default=auto)",
+            help="sets precision for model, (auto/float16/bfloat16/float32, default=auto)",
             default="auto",
         )
         parser.add_argument(
