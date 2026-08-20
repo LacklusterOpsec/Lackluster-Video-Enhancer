@@ -49,9 +49,8 @@ class HomeTab:
         self.parent.githubBtn.clicked.connect(
             lambda: openLink("https://github.com/LacklusterOpsec/Lackluster-Video-Enhancer")
         )
-        self.parent.kofiBtn.clicked.connect(
-            lambda: openLink("https://ko-fi.com/tntwise")
-        )
+        # this fork has no donation page of its own, hide the upstream button
+        self.parent.kofiBtn.setVisible(False)
         if networkCheck(
             "https://api.github.com/repos/LacklusterOpsec/Lackluster-Video-Enhancer/releases"
         ):

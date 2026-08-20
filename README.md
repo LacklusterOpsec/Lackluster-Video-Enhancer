@@ -76,27 +76,11 @@ Notes:
 
 Works on any GPU with a Vulkan driver (NVIDIA, AMD, Intel, Apple Silicon). No CUDA requirement. Great fallback for older hardware or when CUDA is unavailable.
 
-![Visitors](https://api.visitorbadge.io/api/visitors?path=https%3A%2F%2Fgithub.com%2FTNTwise%2FREAL-Video-enhancer%2F&countColor=%23263759)
-[![pypresence](https://img.shields.io/badge/using-pypresence-00bb88.svg?style=for-the-badge&logo=discord&logoWidth=20)](https://github.com/qwertyquerty/pypresence)
-
-![license](https://img.shields.io/github/license/tntwise/real-video-enhancer)
+![license](https://img.shields.io/github/license/LacklusterOpsec/Lackluster-Video-Enhancer)
 ![Version](https://img.shields.io/badge/Version-2.4.3-blue)
-![downloads_total](https://img.shields.io/github/downloads/tntwise/REAL-Video-Enhancer/total.svg?label=downloads%40total)
-<a href="https://discord.gg/hwGHXga8ck">
-      <img src="https://img.shields.io/discord/1041502781808328704?label=Discord" alt="Discord Shield"/></a>
-<br/>
-<a href="https://flathub.org/apps/io.github.tntwise.REAL-Video-Enhancer">
-    <img src="https://dl.flathub.org/assets/badges/flathub-badge-en.svg" height="50px"/>
-  </a>
-<br/>
-<strong> Download on Steam! </strong>
-<br/>
-[![Download on Steam](https://img.shields.io/badge/Steam-000000?style=for-the-badge&logo=steam&logoColor=white)](https://store.steampowered.com/app/4087640/)
-
-
 
 <p align=center>
-  <img src="https://github.com/TNTwise/REAL-Video-Enhancer/raw/2.0/icons/logo-v2.svg" width = "25%">
+  <img src="https://raw.githubusercontent.com/LacklusterOpsec/Lackluster-Video-Enhancer/v2-main/icons/logo-v2.svg" width = "25%">
 </p>
 
 # Table of Contents
@@ -118,16 +102,13 @@ Works on any GPU with a Vulkan driver (NVIDIA, AMD, Intel, Apple Silicon). No CU
 * **[Building](#building)**
 * **[Colab Notebook](#colab-notebook)**
 * **[Credits](#credits)**
-  * [People](#people) 
-  * [Software](#software)
-* **[Support Me!](#support-me)**
 
 # Introduction
 
 <strong>REAL Video Enhancer</strong>  is a redesigned and enhanced version of the original Rife ESRGAN App for Linux. This program offers convenient access to frame interpolation and upscaling functionalities on Windows, Linux and MacOS, and is an alternative to outdated software like <a rel="noopener noreferrer" href="https://nmkd.itch.io/flowframes" target="_blank" >Flowframes</a> or <a rel="noopener noreferrer" href="https://github.com/mafiosnik777/enhancr" target="_blank">enhancr</a>.
 
 <p align=center>
-  <img src="https://github.com/TNTwise/REAL-Video-Enhancer/blob/v2-main/screenshots/demo.png?raw=true" width = "100%">
+  <img src="https://raw.githubusercontent.com/LacklusterOpsec/Lackluster-Video-Enhancer/v2-main/screenshots/demo.png" width = "100%">
 </p>
 <h1>Features: </h1>
 <ul>
@@ -212,11 +193,8 @@ Works on any GPU with a Vulkan driver (NVIDIA, AMD, Intel, Apple Silicon). No CU
 
 # Cloning:
 ```
-# Nightly
-git clone --recurse-submodules https://github.com/TNTwise/REAL-Video-Enhancer 
-
-# Stable
-git clone --recurse-submodules https://github.com/TNTwise/REAL-Video-Enhancer --branch 2.4.1
+# Main
+git clone --recurse-submodules https://github.com/LacklusterOpsec/Lackluster-Video-Enhancer --branch v2-main
 ```
 # Building:
 
@@ -271,9 +249,4 @@ python3 build.py --build BUILD_OPTION --copy_backend
 
 
 # Star History
-[![Star History Chart](https://api.star-history.com/svg?repos=tntwise/real-video-enhancer&type=Date)](https://star-history.com/#tntwise/real-video-enhancer&Date)
-
-
-# Support Me:
- * [Ko-Fi](https://ko-fi.com/tntwise)
- * [Steam](https://store.steampowered.com/app/4382640/REAL_Video_Enhancer_Donation/)
+[![Star History Chart](https://api.star-history.com/svg?repos=LacklusterOpsec/Lackluster-Video-Enhancer&type=Date)](https://star-history.com/#LacklusterOpsec/Lackluster-Video-Enhancer&Date)
