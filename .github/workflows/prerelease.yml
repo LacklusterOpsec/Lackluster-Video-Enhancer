@@ -43,7 +43,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions: write-all  
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v5
       
       - name: Setup Distrobox
         run : |
@@ -77,13 +77,13 @@ jobs:
           tar czf backend-v${{ env.APP_VERSION }}.tar.gz backend/
 
       - name: Save Archive as artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: REAL-Video-Enhancer-${{ env.APP_VERSION }}-Linux-portable_x86_64.zip
           path: REAL-Video-Enhancer-${{ env.APP_VERSION }}-Linux-portable_x86_64.zip
 
       - name: Save Archive as artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: backend-v${{ env.APP_VERSION }}.tar.gz 
           path: backend-v${{ env.APP_VERSION }}.tar.gz 
@@ -93,7 +93,7 @@ jobs:
     runs-on: ubuntu-24.04-arm
     permissions: write-all  
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v5
 
       - name: Install Python in distrobox
         run : |
@@ -121,7 +121,7 @@ jobs:
           tar czf backend-v${{ env.APP_VERSION }}.tar.gz backend/
 
       - name: Save Archive as artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: REAL-Video-Enhancer-${{ env.APP_VERSION }}-Linux-portable_arm64.zip
           path: REAL-Video-Enhancer-${{ env.APP_VERSION }}-Linux-portable_arm64.zip
@@ -133,10 +133,10 @@ jobs:
     runs-on: windows-2022
     permissions: write-all  
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v5
       
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: 3.12.9
           
@@ -161,13 +161,13 @@ jobs:
             mv REAL-Video-Enhancer-${{ env.APP_VERSION }}-Windows-Setup.exe REAL-Video-Enhancer-${{ env.APP_VERSION }}-Windows-Setup_x86_64.exe
 
       - name: Save Archive as artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: REAL-Video-Enhancer-${{ env.APP_VERSION }}-Windows-portable_x86_64.zip
           path: REAL-Video-Enhancer-${{ env.APP_VERSION }}-Windows-portable_x86_64.zip
           
       - name: Save Archive as artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: REAL-Video-Enhancer-${{ env.APP_VERSION }}-Windows-Setup_x86_64.exe
           path: REAL-Video-Enhancer-${{ env.APP_VERSION }}-Windows-Setup_x86_64.exe
@@ -178,10 +178,10 @@ jobs:
     permissions: write-all  
     steps:
 
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v5
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: 3.11.9
 
@@ -202,7 +202,7 @@ jobs:
           zip -r REAL-Video-Enhancer-${{ env.APP_VERSION }}-MacOS_x86_64.zip dist/REAL-Video-Enhancer/
 
       - name: Save Archive as artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: REAL-Video-Enhancer-${{ env.APP_VERSION }}-MacOS_x86_64.zip
           path: REAL-Video-Enhancer-${{ env.APP_VERSION }}-MacOS_x86_64.zip
@@ -213,11 +213,11 @@ jobs:
 
     permissions: write-all  
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v5
 
       - name: Set up Python
 
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
 
         with:
           python-version: 3.11.9
@@ -238,7 +238,7 @@ jobs:
           zip -r REAL-Video-Enhancer-${{ env.APP_VERSION }}-MacOS_arm64.zip dist/REAL-Video-Enhancer/
 
       - name: Save Archive as artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: REAL-Video-Enhancer-${{ env.APP_VERSION }}-MacOS_arm64.zip
           path: REAL-Video-Enhancer-${{ env.APP_VERSION }}-MacOS_arm64.zip
@@ -249,7 +249,7 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v6
         with:
           path: artifacts
       - name: Generate version and tag
@@ -276,7 +276,7 @@ jobs:
       #    done
 
       - name: Create Release and Upload Release Asset
-        uses: softprops/action-gh-release@v1        
+        uses: softprops/action-gh-release@v2        
         with:
           name: REAL Video Enhancer ${{ env.APP_VERSION }} Pre-Release
           tag_name: RVE-${{ env.APP_VERSION }}
