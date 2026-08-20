@@ -118,7 +118,23 @@ class TorchTensorRTHandler:
     
     
 
+    @staticmethod
+    def grid_sampler_native() -> bool:
+        """
+        torch-tensorrt >= 2.13 (TensorRT 11) supports grid_sampler natively.
+        The manual decomposition used on older stacks can produce wrong warp
+        results (ghosting / flashes in RIFE), so we only apply it there.
+        """
+        try:
+            major, minor, *_ = str(torch_tensorrt.__version__).split(".")
+            return (int(major), int(minor)) >= (2, 13)
+        except Exception:
+            return False
+
     def grid_sample_decomp(self, exported_program):
+        if self.grid_sampler_native():
+            log("torch-tensorrt >= 2.13: using native grid_sampler support")
+            return exported_program
         from torch_tensorrt.dynamo.conversion.impl.grid import GridSamplerInterpolationMode
         GridSamplerInterpolationMode.update(
             {
