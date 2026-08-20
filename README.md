@@ -4,6 +4,13 @@
 
 ## Changes in this fork
 
+**Newest additions**
+- Added **PyTorch 2.13** (CUDA 13 / Blackwell / RTX 50-series) and **TensorRT 11** as selectable install options. Older versions (2.9 / 2.8 / 2.6) are kept in the dropdown for compatibility with older GPUs — see the tooltip notes in the app.
+- Fixed the PyInstaller build (`backports` runtime error on Python 3.11) and made `build.py` stop force-recreating an existing venv.
+- Fixed the GitHub Actions CI for this fork (branches + release notes from this repo); `build-prerelease` builds Windows/Linux/macOS and publishes a release.
+- App update checks, the home-tab changelog, and backend downloads now point at **this fork** instead of upstream.
+- Windows installer (NSIS) version synced to 2.4.2.
+
 **Bug fixes**
 - Fixed FFmpeg reading randomly stopping mid-render (`-nostdin` on the reader process)
 - Fixed rotated / iPhone portrait videos failing to render (rotation-aware dimensions, safe crop clamping, `-noautorotate` in border detection)

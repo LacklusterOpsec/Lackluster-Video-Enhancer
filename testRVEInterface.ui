@@ -5831,7 +5831,7 @@ color: red;
                             </size>
                            </property>
                            <property name="toolTip">
-                            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;PyTorch Version&lt;/span&gt;&lt;/p&gt;&lt;p&gt;- This is the version downloaded&lt;/p&gt;&lt;p&gt;- 2.6: Supports older CUDA enabled GPUs&lt;/p&gt;&lt;p&gt;- 2.8: Supports all RTX cards, faster and recomended.&lt;/p&gt;&lt;p&gt;- 2.9: Experimental.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;PyTorch Version&lt;/span&gt;&lt;/p&gt;&lt;p&gt;- This is the version downloaded&lt;/p&gt;&lt;p&gt;- 2.13 (CUDA 13): Newest. Best for RTX 50-series (Blackwell) and newer GPUs. Recommended. (Requires Turing/RTX 20-series or newer, or CUDA 12.x driver on older cards)&lt;/p&gt;&lt;p&gt;- 2.9 (CUDA 13): All RTX 20-40 series. Good all-rounder.&lt;/p&gt;&lt;p&gt;- 2.8 (CUDA 12.9): All RTX cards.&lt;/p&gt;&lt;p&gt;- 2.6 (CUDA 11.8): Supports older CUDA-enabled GPUs (GTX 10/16-series, V100, older). Use this if newer versions fail to load on your GPU.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                            </property>
                            <property name="toolTipDuration">
                             <number>0</number>

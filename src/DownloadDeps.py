@@ -396,7 +396,11 @@ class DownloadDependencies:
                 return_codes.append(return_code)
 
                 if backend == "tensorrt":
-                    trt_ver = "10.12.0.36"
+                    # torch-tensorrt pins a specific TensorRT API level per torch release
+                    if torch_version.startswith("2.13"):
+                        trt_ver = "11.0.0.114"  # torch-tensorrt 2.13 -> TensorRT 11.0
+                    else:
+                        trt_ver = "10.12.0.36"
                     deps = [
                         f"tensorrt=={trt_ver}",
                         f"tensorrt_cu12=={trt_ver}",
@@ -407,7 +411,7 @@ class DownloadDependencies:
                     if install:
                         
                         torch_version = torch_version[:-1] + "0" # remove the last character (2.7.1 -> 2.7.0), torch tensorrt doesnt release a new version for every new pytorch minor release
-                        deps += ["--no-deps","dllist",f"torch-tensorrt=={torch_version}{torch_backend}"]
+                        deps += ["--no-deps","dllist","psutil",f"torch-tensorrt=={torch_version}{torch_backend}"]
 
                     return_code = self.pip(deps, install)
                     return_codes.append(return_code)

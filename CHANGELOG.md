@@ -1,6 +1,7 @@
 # RVE 2.4.2
 ### Added
  - Decimal frame timestep support.
+ - PyTorch 2.13 (CUDA 13 / TensorRT 11) as an installable option; older versions kept for older GPUs.
 ### Fixed
  - FFmpeg read randomly stopping mid-render (thanks @potocpav).
  - Vertical/rotated (iPhone) videos failing to render.
@@ -14,6 +15,8 @@
 ### Changed
  - AV1 / AV1 NVENC quality presets adjusted.
  - Failed simple-install now exits instead of launching a broken UI.
+ - App update checks, home-tab changelog, and backend downloads now use this fork's releases.
+ - GitHub Actions CI fixed for this fork (builds Windows/Linux/macOS, publishes releases).
  - Performance: removed a global CUDA sync and redundant tensor clone per frame.
  - Performance: scene detection now downscales on the GPU.
  - Performance: output override scale resize moved off the CPU path.
