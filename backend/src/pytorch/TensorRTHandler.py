@@ -121,13 +121,13 @@ class TorchTensorRTHandler:
     @staticmethod
     def grid_sampler_native() -> bool:
         """
-        torch-tensorrt >= 2.13 (TensorRT 11) supports grid_sampler natively.
-        The manual decomposition used on older stacks can produce wrong warp
-        results (ghosting / flashes in RIFE), so we only apply it there.
+        torch-tensorrt >= 2.13 (TensorRT 11) advertises native grid_sampler,
+        but on this app's RIFE / TRT 11 / Blackwell combo the native path
+        produced checkerboard / white-patch artifacts. We keep using the
+        decomposed path (which is known-good) unless explicitly enabled.
         """
         try:
-            major, minor, *_ = str(torch_tensorrt.__version__).split(".")
-            return (int(major), int(minor)) >= (2, 13)
+            return os.environ.get("RVE_TRT_NATIVE_GRIDSAMPLER", "0") == "1"
         except Exception:
             return False
 

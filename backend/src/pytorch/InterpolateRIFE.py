@@ -297,6 +297,7 @@ class InterpolateRifeTorch(BaseInterpolate):
                     + f"_{'bf16' if self.dtype == torch.bfloat16 else ('fp16' if self.dtype == torch.float16 else 'fp32')}"
                     + f"_scale-{self.scale}"
                     + ("_gsnative" if trtHandler.grid_sampler_native() else "")
+                    + "_gsdecomp"
                     + f"_{torch.cuda.get_device_name(self.device)}"
                     + f"_trt-{trtHandler.tensorrt_version}"
                     + f"_ensemble-{self.ensemble}"
