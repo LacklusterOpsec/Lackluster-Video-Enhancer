@@ -14,12 +14,17 @@
  - NCNN upscale frames reporting the wrong (pre-scale) dimensions.
  - Progress/ETA undercounting frames and incorrect FPS after pausing.
  - PyInstaller build error on Python 3.11 (`backports` runtime import); `build.py` no longer force-recreates an existing venv.
+ - TensorRT engine builds no longer fail on Ampere+/Blackwell GPUs when using `auto` precision (bf16 is not supported for TensorRT engines; `auto` now uses fp16 for the TensorRT backend, while bf16 remains available for the PyTorch backend).
+ - macOS CI builds fixed (Homebrew tap trust + llvm linking).
+ - GitHub Actions migrated to Node 24 runtimes.
 ### Changed
  - AV1 / AV1 NVENC quality presets adjusted.
  - Failed simple-install now exits instead of launching a broken UI.
  - App update checks, home-tab changelog, and backend downloads now use this fork's releases.
  - GitHub Actions CI fixed for this fork (builds Windows/Linux/macOS, publishes releases).
  - Windows installer (NSIS) version synced to 2.4.3.
+ - Windows installer branded as LacklusterOpsec; start menu shortcut installed directly (no company subfolder).
+ - TensorRT install is now version-matched to the selected PyTorch version (2.13 → TensorRT 11).
  - Performance: removed a global CUDA sync and redundant tensor clone per frame.
  - Performance: scene detection now downscales on the GPU.
  - Performance: output override scale resize moved off the CPU path.
