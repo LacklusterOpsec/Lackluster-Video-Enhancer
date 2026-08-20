@@ -28,13 +28,31 @@ import torch.nn.functional as F
 
 def warp(tenInput, tenFlow, tenFlow_div, backwarp_tenGrid):
     dtype = tenInput.dtype
-    tenInput = tenInput.to(torch.float)
-    tenFlow = tenFlow.to(torch.float)
+    if dtype != torch.float16:
+        # fp32/bf16: compute in fp32 for precision (matches upstream RIFE)
+        tenInput = tenInput.to(torch.float)
+        tenFlow = tenFlow.to(torch.float)
 
     tenFlow = torch.cat(
         [tenFlow[:, 0:1] / tenFlow_div[0], tenFlow[:, 1:2] / tenFlow_div[1]], 1
     )
     g = (backwarp_tenGrid + tenFlow).permute(0, 2, 3, 1)
+
+    if dtype == torch.float16:
+        # keep the whole grid_sample in fp16 - the fp32-cast-then-downcast
+        # pattern is what triggers incorrect output in mixed-precision TRT
+        # engines (pytorch/TensorRT#4074); fp16-only is the known-good path
+        # used by ComfyUI-Rife-Tensorrt
+        g = g.half()
+        tenInput = tenInput.half()
+        backwarp_tenGrid16 = backwarp_tenGrid.half() if backwarp_tenGrid.dtype != torch.float16 else backwarp_tenGrid
+        g = (backwarp_tenGrid16 + tenFlow).permute(0, 2, 3, 1)
+        pd = 'border'
+        if tenInput.device.type == "mps":
+            pd = 'zeros'
+            g = g.clamp(-1, 1)
+        return F.grid_sample(input=tenInput, grid=g, mode="bilinear", padding_mode=pd, align_corners=True)
+
     pd = 'border'
     if tenInput.device.type == "mps":
         pd = 'zeros'
