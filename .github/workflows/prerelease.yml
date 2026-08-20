@@ -116,10 +116,6 @@ jobs:
           mv dist/ bin/
           zip -r REAL-Video-Enhancer-${{ env.APP_VERSION }}-Linux-portable_arm64.zip bin/
 
-      - name: compress backend
-        run: |
-          tar czf backend-v${{ env.APP_VERSION }}.tar.gz backend/
-
       - name: Save Archive as artifact
         uses: actions/upload-artifact@v6
         with:
