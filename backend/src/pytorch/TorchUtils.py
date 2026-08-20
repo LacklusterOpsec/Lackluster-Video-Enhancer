@@ -154,10 +154,12 @@ class TorchUtils:
         log(f"Handling precision: {precision}")
         if precision == "auto":
             if backend == "tensorrt":
-                # TensorRT engines do not support bf16; fp16 TRT engines on
-                # TRT 11 / Blackwell produced checkerboard/white-patch artifacts
-                # in RIFE - fp32 is the verified-clean default for TRT.
-                log("TensorRT backend: auto resolves to float32 (fp16/bf16 TRT engines are unreliable on this stack)")
+                # fp16 engines + fp16 warp are verified clean and fastest on
+                # TRT 11 (strict fp16, no mixed precision); fp32 fallback for
+                # GPUs without half support.
+                if backendDetect.get_half_precision():
+                    log("TensorRT backend: auto resolves to float16")
+                    return torch.float16
                 return torch.float32
             # prefer bf16 on Ampere+ (sm_80+) GPUs: same speed as fp16 with
             # better dynamic range (no overflow on bright/HDR content)
