@@ -11,7 +11,7 @@
 - Fixed the PyInstaller build (`backports` runtime error on Python 3.11) and made `build.py` stop force-recreating an existing venv.
 - Fixed the GitHub Actions CI for this fork (branches + release notes from this repo, Node 24 runtimes, macOS Homebrew tap-trust/llvm fixes); `build-prerelease` builds Windows/Linux/macOS and publishes a release.
 - App update checks, the home-tab changelog, and backend downloads now point at **this fork** instead of upstream.
-- Windows installer (NSIS) version synced to 2.4.3, branded as **LacklusterOpsec**, with the start-menu shortcut installed directly (no company subfolder).
+- Windows installer (NSIS) version synced to 2.4.2, branded as **LacklusterOpsec**, with the start-menu shortcut installed directly (no company subfolder).
 
 **Bug fixes**
 - Fixed FFmpeg reading randomly stopping mid-render (`-nostdin` on the reader process)
@@ -33,7 +33,7 @@
 - NCNN fallback reuses its extractor instead of allocating per frame
 - TensorRT engine build now clears VRAM after compiling
 - AV1 / AV1 NVENC quality presets adjusted
-- Version bumped to 2.4.3
+- Version bumped to 2.4.2
 
 ## Compatibility
 
@@ -80,7 +80,7 @@ Notes:
 Works on any GPU with a Vulkan driver (NVIDIA, AMD, Intel, Apple Silicon). No CUDA requirement. Great fallback for older hardware or when CUDA is unavailable.
 
 ![license](https://img.shields.io/github/license/LacklusterOpsec/Lackluster-Video-Enhancer)
-![Version](https://img.shields.io/badge/Version-2.4.3-blue)
+![Version](https://img.shields.io/badge/Version-2.4.2-blue)
 
 <p align=center>
   <img src="https://raw.githubusercontent.com/LacklusterOpsec/Lackluster-Video-Enhancer/v2-main/icons/logo-v2.svg" width = "25%">

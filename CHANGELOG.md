@@ -1,4 +1,4 @@
-# RVE 2.4.3
+# RVE 2.4.2
 ### Added
  - PyTorch 2.13 (CUDA 13 / Blackwell / RTX 50-series) as an installable option, paired with TensorRT 11 and torch-tensorrt 2.13. Older PyTorch versions (2.9 / 2.8 / 2.6) remain selectable for older GPUs.
  - bfloat16 precision option. `auto` now uses bfloat16 on RTX 30-series/Ampere+ GPUs (same speed as fp16, better dynamic range for bright/HDR content) and fp16 elsewhere.
@@ -23,7 +23,7 @@
  - Failed simple-install now exits instead of launching a broken UI.
  - App update checks, home-tab changelog, and backend downloads now use this fork's releases.
  - GitHub Actions CI fixed for this fork (builds Windows/Linux/macOS, publishes releases).
- - Windows installer (NSIS) version synced to 2.4.3.
+ - Windows installer (NSIS) version synced to 2.4.2.
  - Windows installer branded as LacklusterOpsec; start menu shortcut installed directly (no company subfolder).
  - TensorRT install is now version-matched to the selected PyTorch version (2.13 → TensorRT 11).
  - Performance: removed a global CUDA sync and redundant tensor clone per frame.

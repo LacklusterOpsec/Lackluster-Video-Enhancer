@@ -5,9 +5,15 @@ on:
     branches:
       - v2-main
   workflow_dispatch:
+    inputs:
+      publish_as_latest:
+        description: 'Publish as the Latest release (uncheck to publish as a prerelease)'
+        required: false
+        default: 'true'
+        type: boolean
 
 env:
-  APP_VERSION: 2.4.3
+  APP_VERSION: 2.4.2
   LINUX_CLIENT_PYTHON_VER: 3.12.9
 
 jobs:
@@ -273,11 +279,11 @@ jobs:
       - name: Create Release and Upload Release Asset
         uses: softprops/action-gh-release@v3        
         with:
-          name: REAL Video Enhancer ${{ env.APP_VERSION }} Pre-Release
+          name: REAL Video Enhancer ${{ env.APP_VERSION }}${{ github.event.inputs.publish_as_latest == 'true' && '' || ' Pre-Release' }}
           tag_name: RVE-${{ env.APP_VERSION }}
           body_path: ./RELEASE_BODY.md
           draft: false
-          prerelease: true
+          prerelease: ${{ github.event.inputs.publish_as_latest == 'false' }}
           
           files: |
               artifacts/REAL-Video-Enhancer-${{ env.APP_VERSION }}-Windows-portable_x86_64.zip/REAL-Video-Enhancer-${{ env.APP_VERSION }}-Windows-portable_x86_64.zip

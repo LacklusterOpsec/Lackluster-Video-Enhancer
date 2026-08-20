@@ -8,7 +8,7 @@
 ; Custom defines
   !define NAME "REAL Video Enhancer"
   !define APPFILE "REAL-Video-Enhancer.exe"
-  !define VERSION "2.4.3"
+  !define VERSION "2.4.2"
   !define SLUG "${NAME} v${VERSION}"
   !define COMPANYNAME "LacklusterOpsec"
   !define VERSIONMAJOR 2

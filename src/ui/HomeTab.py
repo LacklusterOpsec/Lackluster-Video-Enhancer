@@ -35,7 +35,7 @@ class HomeTab:
         else:
             try:
                 fetched = tuple(map(int, fetched_tag.split(".")))
-                local = tuple(map(int, "2.4.3".split(".")))
+                local = tuple(map(int, "2.4.2".split(".")))
                 if fetched < local:
                     changeLog = self._local_changelog()
             except Exception:
