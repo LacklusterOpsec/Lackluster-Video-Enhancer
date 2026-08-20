@@ -5,11 +5,12 @@
 ## Changes in this fork
 
 **Newest additions**
+- Added **bfloat16** as a precision option. `Auto` now uses bfloat16 on RTX 30-series/Ampere+ GPUs (same speed as fp16, better dynamic range — no overflow on bright/HDR content) and falls back to fp16 elsewhere.
 - Added **PyTorch 2.13** (CUDA 13 / Blackwell / RTX 50-series) and **TensorRT 11** as selectable install options. Older versions (2.9 / 2.8 / 2.6) are kept in the dropdown for compatibility with older GPUs — see the tooltip notes in the app.
 - Fixed the PyInstaller build (`backports` runtime error on Python 3.11) and made `build.py` stop force-recreating an existing venv.
 - Fixed the GitHub Actions CI for this fork (branches + release notes from this repo); `build-prerelease` builds Windows/Linux/macOS and publishes a release.
 - App update checks, the home-tab changelog, and backend downloads now point at **this fork** instead of upstream.
-- Windows installer (NSIS) version synced to 2.4.2.
+- Windows installer (NSIS) version synced to 2.4.3.
 
 **Bug fixes**
 - Fixed FFmpeg reading randomly stopping mid-render (`-nostdin` on the reader process)
@@ -31,13 +32,55 @@
 - NCNN fallback reuses its extractor instead of allocating per frame
 - TensorRT engine build now clears VRAM after compiling
 - AV1 / AV1 NVENC quality presets adjusted
-- Version bumped to 2.4.2
+- Version bumped to 2.4.3
+
+## Compatibility
+
+### PyTorch versions (selectable in the Download tab)
+
+| Version | CUDA wheel | GPU support | Notes |
+|---|---|---|---|
+| **2.13.0** (default) | `+cu130` | RTX 20/30/40/50 (Turing / sm_75 and newer) | Newest. Best on RTX 50-series / Blackwell. Pairs with TensorRT 11. Requires CUDA 13-capable drivers. |
+| **2.9.0** | `+cu130` | RTX 20/30/40 (Turing+) | Stable all-rounder. |
+| **2.8.0** | `+cu129` | RTX 20/30/40 (Turing+) | |
+| **2.6.0** | `+cu118` | GTX 10/16, V100 and older (Pascal/Volta/Turing+) | Legacy fallback. Use this if newer versions fail to load on your GPU. |
+
+Notes:
+- **CUDA 13 (`+cu130`) requires Turing or newer (sm_7.5+).** Maxwell/Pascal/Volta GPUs (GTX 900/10, V100) must use the CUDA 11.8 build (**2.6.0**).
+- Volta (V100) support was dropped from newer CUDA 12.8+/13 wheel sets; use 2.6.0 for those cards.
+- **ROCm (AMD, Linux only):** 2.13 → ROCm 7.2, 2.9/2.8 → ROCm 6.4, 2.6 → ROCm 6.2.4.
+- **XPU (Intel):** available on all listed versions.
+- **MPS (Apple Silicon):** locked to PyTorch 2.9.0 for uint16 (HDR) support.
+
+### Precision options
+
+| Precision | GPU support | Notes |
+|---|---|---|
+| **auto** (default) | — | Uses **bfloat16** on RTX 30-series / Ampere+ (sm_80+), **float16** elsewhere, **float32** if half precision is unavailable. |
+| **float16** | All CUDA/ROCm/XPU/MPS | Fastest, lowest VRAM. |
+| **bfloat16** | RTX 30-series+ (Ampere, sm_80+) | Same speed as float16, but with an 8-bit exponent — no overflow on bright/HDR content. Falls back to float32 automatically if a model doesn't support it. |
+| **float32** | All | Slowest, most compatible. |
+
+### TensorRT
+
+| PyTorch | TensorRT | torch-tensorrt | Notes |
+|---|---|---|---|
+| **2.13.0** | **11.0.0.114** | 2.13.0 | CUDA 13. Requires Turing+ (RTX 20-series / sm_75+). |
+| 2.9.0 / 2.8.0 / 2.6.0 | 10.12.0.36 | matching torch version | Older TRT 10 line. |
+
+Notes:
+- TensorRT requires an NVIDIA GPU with dedicated tensor cores — **RTX 20-series (Turing) or newer**. Not available on GTX 10/16-series or older.
+- TensorRT 11 requires CUDA 13-capable drivers (all RTX 20+ with recent drivers).
+
+### NCNN (Vulkan)
+
+Works on any GPU with a Vulkan driver (NVIDIA, AMD, Intel, Apple Silicon). No CUDA requirement. Great fallback for older hardware or when CUDA is unavailable.
 
 ![Visitors](https://api.visitorbadge.io/api/visitors?path=https%3A%2F%2Fgithub.com%2FTNTwise%2FREAL-Video-enhancer%2F&countColor=%23263759)
 [![pypresence](https://img.shields.io/badge/using-pypresence-00bb88.svg?style=for-the-badge&logo=discord&logoWidth=20)](https://github.com/qwertyquerty/pypresence)
 
 ![license](https://img.shields.io/github/license/tntwise/real-video-enhancer)
-![Version](https://img.shields.io/badge/Version-2.4.2-blue)
+![Version](https://img.shields.io/badge/Version-2.4.3-blue)
 ![downloads_total](https://img.shields.io/github/downloads/tntwise/REAL-Video-Enhancer/total.svg?label=downloads%40total)
 <a href="https://discord.gg/hwGHXga8ck">
       <img src="https://img.shields.io/discord/1041502781808328704?label=Discord" alt="Discord Shield"/></a>
@@ -60,6 +103,7 @@
   
 * **[Introduction](#introduction)**
 * **[Features](#Features)**
+* **[Compatibility](#compatibility)**
 * **[Hardware Requirements](#hardware-requirements)**
 * **[Models](#models)**
   * [Interpolate Models](#interpolate-models)

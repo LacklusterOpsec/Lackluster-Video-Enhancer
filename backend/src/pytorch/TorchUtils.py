@@ -153,6 +153,10 @@ class TorchUtils:
     def handle_precision(precision) -> torch.dtype:
         log(f"Handling precision: {precision}")
         if precision == "auto":
+            # prefer bf16 on Ampere+ (sm_80+) GPUs: same speed as fp16 with
+            # better dynamic range (no overflow on bright/HDR content)
+            if backendDetect.get_bf16_support():
+                return torch.bfloat16
             return torch.float16 if backendDetect.get_half_precision() else torch.float32
         if precision == "float32":
             return torch.float32

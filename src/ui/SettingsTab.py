@@ -423,7 +423,7 @@ class Settings:
             "auto_hdr_mode": "True",
         }
         self.allowedSettings = {
-            "precision": ("auto", "float32", "float16"),
+            "precision": ("auto", "float32", "float16", "bfloat16"),
             "tensorrt_optimization_level": ("0", "1", "2", "3", "4", "5"),
             "dynamic_tensorrt_engine": ("True", "False"),
             "encoder": (

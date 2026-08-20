@@ -192,7 +192,7 @@ class UpscalePytorch:
                 self.trt_engine_name = os.path.join(
                     (
                         f"{os.path.basename(self.modelPath)}"
-                        + f"_{'fp16' if self.dtype == torch.float16 else 'fp32'}"
+                        + f"_{'bf16' if self.dtype == torch.bfloat16 else ('fp16' if self.dtype == torch.float16 else 'fp32')}"
                         + f"_{torch.cuda.get_device_name(self.device)}"
                         + f"_trt-{trtHandler.tensorrt_version}"
                         + f"_torch_tensorrt-{trtHandler.torch_tensorrt_version}"

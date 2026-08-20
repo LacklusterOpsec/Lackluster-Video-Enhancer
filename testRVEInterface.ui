@@ -4955,7 +4955,7 @@ QTabWidget::pane { /* The tab widget frame */
                               </size>
                              </property>
                              <property name="toolTip">
-                              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Precision:&lt;/p&gt;&lt;p&gt; - Auto: Defaults to float16 if the GPU is supported (RTX 20 series and up)&lt;/p&gt;&lt;p&gt; - Float16: Faster inference and less VRAM usage.&lt;/p&gt;&lt;p&gt; - Float32: Slower inference and more VRAM usage, supported on more GPUS.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Precision:&lt;/p&gt;&lt;p&gt; - Auto: Uses bfloat16 on Ampere+/RTX 30-series and newer GPUs, float16 elsewhere.&lt;/p&gt;&lt;p&gt; - Float16: Faster inference and less VRAM usage.&lt;/p&gt;&lt;p&gt; - Bfloat16: Same speed as float16 on RTX 30-series and newer, with better dynamic range (avoids overflow on bright/HDR content).&lt;/p&gt;&lt;p&gt; - Float32: Slower inference and more VRAM usage, supported on more GPUs.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                              </property>
                              <property name="text">
                               <string/>
@@ -4983,6 +4983,11 @@ QTabWidget::pane { /* The tab widget frame */
                              <item>
                               <property name="text">
                                <string>float32</string>
+                              </property>
+                             </item>
+                             <item>
+                              <property name="text">
+                               <string>bfloat16</string>
                               </property>
                              </item>
                             </widget>

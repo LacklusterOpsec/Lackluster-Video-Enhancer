@@ -1,7 +1,8 @@
-# RVE 2.4.2
+# RVE 2.4.3
 ### Added
+ - PyTorch 2.13 (CUDA 13 / Blackwell / RTX 50-series) as an installable option, paired with TensorRT 11 and torch-tensorrt 2.13. Older PyTorch versions (2.9 / 2.8 / 2.6) remain selectable for older GPUs.
+ - bfloat16 precision option. `auto` now uses bfloat16 on RTX 30-series/Ampere+ GPUs (same speed as fp16, better dynamic range for bright/HDR content) and fp16 elsewhere.
  - Decimal frame timestep support.
- - PyTorch 2.13 (CUDA 13 / TensorRT 11) as an installable option; older versions kept for older GPUs.
 ### Fixed
  - FFmpeg read randomly stopping mid-render (thanks @potocpav).
  - Vertical/rotated (iPhone) videos failing to render.
@@ -12,11 +13,13 @@
  - Segmented scene detect only evaluating a fraction of the image.
  - NCNN upscale frames reporting the wrong (pre-scale) dimensions.
  - Progress/ETA undercounting frames and incorrect FPS after pausing.
+ - PyInstaller build error on Python 3.11 (`backports` runtime import); `build.py` no longer force-recreates an existing venv.
 ### Changed
  - AV1 / AV1 NVENC quality presets adjusted.
  - Failed simple-install now exits instead of launching a broken UI.
  - App update checks, home-tab changelog, and backend downloads now use this fork's releases.
  - GitHub Actions CI fixed for this fork (builds Windows/Linux/macOS, publishes releases).
+ - Windows installer (NSIS) version synced to 2.4.3.
  - Performance: removed a global CUDA sync and redundant tensor clone per frame.
  - Performance: scene detection now downscales on the GPU.
  - Performance: output override scale resize moved off the CPU path.

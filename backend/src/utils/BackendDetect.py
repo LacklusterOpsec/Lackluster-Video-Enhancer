@@ -69,6 +69,22 @@ class BackendDetect:
         except Exception as e:
             log_error(str(e))
             return False    
+
+    def get_bf16_support(self):
+        """
+        Checks whether the torch backend can use bfloat16 tensor cores
+        (Ampere / sm_80+ CUDA and ROCm GPUs). Older GPUs fall back to fp16.
+        """
+
+        try:
+            if self.pytorch_device in ("cuda", "rocm"):
+                capability = self.__torch.cuda.get_device_capability()
+                if capability and capability[0] >= 8:
+                    return True
+                return False
+        except Exception as e:
+            log_error(str(e))
+        return False
     
     def get_gpus_torch(self):
         """
